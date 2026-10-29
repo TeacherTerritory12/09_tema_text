@@ -6,19 +6,20 @@
     <title>Вебквест: Опрацювання текстових даних (9 клас)</title>
     <style>
         :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --border-color: #e2e8f0;
-            --success: #16a34a;
-            --error: #dc2626;
+            --bg-main: #0f172a;       /* Глибокий темно-синій */
+            --card-bg: #1e293b;       /* Трохи світліший синій для карток */
+            --primary: #38bdf8;       /* Яскравий блакитний акцент */
+            --primary-hover: #0ea5e9;
+            --text-color: #f1f5f9;    /* Світлий текст */
+            --text-muted: #94a3b8;    /* Приглушений текст */
+            --border-color: #334155;  /* Межі */
+            --success: #22c55e;
+            --error: #ef4444;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            background-color: var(--bg-main);
             color: var(--text-color);
             margin: 0;
             padding: 20px;
@@ -34,7 +35,8 @@
             background: var(--card-bg);
             padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
         }
 
         h1 {
@@ -46,18 +48,77 @@
 
         .subtitle {
             text-align: center;
-            color: #64748b;
+            color: var(--text-muted);
             margin-bottom: 25px;
             font-size: 14px;
+        }
+
+        /* Екран входу */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background-color: #0f172a;
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 12px;
+            min-height: 15px;
+        }
+
+        /* Прогрес бар */
+        .progress-container {
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: 8px;
+            height: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
         }
 
         .info-bar {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: 600;
-            color: #475569;
-            border-bottom: 2px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
         }
 
@@ -66,12 +127,15 @@
             font-weight: 600;
             margin-bottom: 20px;
             line-height: 1.4;
+            color: var(--text-color);
         }
 
         .hint {
             font-size: 13px;
-            color: #d97706;
-            background: #fef3c7;
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            padding: 8:px 12px;
             padding: 8px 12px;
             border-radius: 6px;
             margin-bottom: 15px;
@@ -84,7 +148,7 @@
         }
 
         .option-item {
-            background: #f1f5f9;
+            background: #0f172a;
             border: 2px solid var(--border-color);
             padding: 12px 16px;
             margin-bottom: 10px;
@@ -94,15 +158,16 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            color: var(--text-color);
         }
 
         .option-item:hover {
-            background: #e2e8f0;
-            border-color: #cbd5e1;
+            background: #1e293b;
+            border-color: #475569;
         }
 
         .option-item.selected {
-            background: #e0e7ff;
+            background: rgba(56, 189, 248, 0.15);
             border-color: var(--primary);
         }
 
@@ -115,11 +180,11 @@
 
         .btn {
             background-color: var(--primary);
-            color: white;
+            color: #0f172a;
             border: none;
             padding: 12px 24px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
@@ -130,21 +195,30 @@
             background-color: var(--primary-hover);
         }
 
+        .quiz-section, .results {
+            display: none;
+        }
+
         .results {
             text-align: center;
-            display: none;
         }
 
         .results h2 {
             color: var(--primary);
-            font-size: 28px;
+            font-size: 26px;
         }
 
         .score-badge {
-            font-size: 48px;
+            font-size: 42px;
             font-weight: bold;
             color: var(--primary);
-            margin: 20px 0;
+            margin: 15px 0;
+        }
+
+        .student-name-display {
+            font-size: 18px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -154,10 +228,25 @@
     <h1>Квест: Опрацювання текстових даних</h1>
     <div class="subtitle">Й. Ривкінд, НУШ 9 клас</div>
 
-    <div id="quiz-container">
+    <!-- Екран реєстрації (Введення ПІБ) -->
+    <div id="login-screen">
+        <div class="form-group">
+            <label for="student-name">Введіть ваше Прізвище та Ім'я (українською мовою):</label>
+            <input type="text" id="student-name" placeholder="Наприклад: Шевченко Тарас">
+            <div id="name-error" class="error-msg"></div>
+        </div>
+        <button class="btn" onclick="startQuiz()">Розпочати квест</button>
+    </div>
+
+    <!-- Екран квесту -->
+    <div id="quiz-container" class="quiz-section">
+        <div class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
         <div class="info-bar">
             <span id="question-counter">Запитання 1 з 10</span>
-            <span id="score-counter">Бали: 0</span>
+            <span id="student-greeting"></span>
         </div>
 
         <div id="question-box" class="question-box"></div>
@@ -168,11 +257,13 @@
         <button id="next-btn" class="btn" onclick="handleNextButton()">Далі</button>
     </div>
 
+    <!-- Екран результатів -->
     <div id="results-container" class="results">
-        <h2>Вітаємо з проходженням квесту! 🎉</h2>
-        <p>Ви завершили перевірку знань за темою «Опрацювання текстових даних».</p>
+        <h2>Результати тестування</h2>
+        <div class="student-name-display" id="result-name"></div>
         <div class="score-badge" id="final-score">0 / 10</div>
-        <button class="btn" onclick="restartQuiz()">Спробувати знову</button>
+        <p id="grade-text" style="font-size: 18px; margin-bottom: 20px;"></p>
+        <button class="btn" onclick="location.reload()">Пройти знову</button>
     </div>
 </div>
 
@@ -272,14 +363,7 @@
 
     let currentQuestionIndex = 0;
     let score = 0;
-
-    const questionCounter = document.getElementById("question-counter");
-    const scoreCounter = document.getElementById("score-counter");
-    const questionBox = document.getElementById("question-box");
-    const optionsContainer = document.getElementById("options-container");
-    const quizContainer = document.getElementById("quiz-container");
-    const resultsContainer = document.getElementById("results-container");
-    const finalScore = document.getElementById("final-score");
+    let studentFullName = "";
 
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -289,15 +373,44 @@
         return array;
     }
 
-    // Перемішуємо самі питання та варіанти всередині них при завантаженні
     shuffle(questions);
     questions.forEach(q => shuffle(q.options));
 
+    function startQuiz() {
+        const nameInput = document.getElementById("student-name");
+        const errorDiv = document.getElementById("name-error");
+        const rawValue = nameInput.value.trim();
+
+        // Регулярний вираз: перевіряє чи це мінімум два слова, написані виключно українськими літерами
+        // Дозволяє літери а-щ, є, і, ї, ґ, пробіли, дефіси та апострофи.
+        const ukrainianNameRegex = /^[А-ЩЬЮЯҐЄІЇA-ЩЬЮЯҐЄІЇа-щьюяґєї']+(\s+[А-ЩЬЮЯҐЄІЇа-щьюяґєї'-]+)+$/;
+
+        if (!ukrainianNameRegex.test(rawValue)) {
+            errorDiv.innerText = "Будь ласка, введіть коректно Прізвище та Ім'я українською мовою (мінімум два слова).";
+            return;
+        }
+
+        errorDiv.innerText = "";
+        studentFullName = rawValue;
+
+        // Перемикаємо екран
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("quiz-container").style.display = "block";
+        document.getElementById("student-greeting").innerText = studentFullName;
+
+        loadQuestion();
+    }
+
     function loadQuestion() {
         const currentQ = questions[currentQuestionIndex];
-        questionCounter.innerText = `Запитання ${currentQuestionIndex + 1} з ${questions.length}`;
-        scoreCounter.innerText = `Бали: ${score}`;
-        questionBox.innerText = currentQ.question;
+        
+        // Оновлюємо рядок прогресу
+        document.getElementById("question-counter").innerText = `Запитання ${currentQuestionIndex + 1} з ${questions.length}`;
+        const progressPercent = ((currentQuestionIndex) / questions.length) * 100;
+        document.getElementById("progress-bar").style.width = `${progressPercent}%`;
+
+        document.getElementById("question-box").innerText = currentQ.question;
+        const optionsContainer = document.getElementById("options-container");
         optionsContainer.innerHTML = "";
 
         currentQ.options.forEach((option, index) => {
@@ -322,20 +435,18 @@
 
     function handleNextButton() {
         const currentQ = questions[currentQuestionIndex];
-        const checkboxes = optionsContainer.querySelectorAll("input[type='checkbox']");
+        const checkboxes = document.querySelectorAll("#options-container input[type='checkbox']");
         
         let userChoices = [];
         checkboxes.forEach((cb, idx) => {
             if (cb.checked) userChoices.push(idx);
         });
 
-        // Перевіряємо, чи обрано рівно дві відповіді
         if (userChoices.length !== 2) {
             alert("Будь ласка, оберіть рівно ДВІ відповіді!");
             return;
         }
 
-        // Перевіряємо правильність
         let correctIndices = [];
         currentQ.options.forEach((opt, idx) => {
             if (opt.correct) correctIndices.push(idx);
@@ -357,22 +468,18 @@
     }
 
     function showResults() {
-        quizContainer.style.display = "none";
-        resultsContainer.style.display = "block";
-        finalScore.innerText = `${score} / ${questions.length}`;
-    }
+        document.getElementById("quiz-container").style.display = "none";
+        document.getElementById("results-container").style.display = "block";
+        
+        document.getElementById("result-name").innerText = studentFullName;
+        document.getElementById("final-score").innerText = `${score} / ${questions.length}`;
 
-    function restartQuiz() {
-        currentQuestionIndex = 0;
-        score = 0;
-        shuffle(questions);
-        questions.forEach(q => shuffle(q.options));
-        quizContainer.style.display = "block";
-        resultsContainer.style.display = "none";
-        loadQuestion();
-    }
+        // Розрахунок оцінки за 12-бальною шкалою
+        let grade12 = Math.round((score / questions.length) * 12);
+        if (grade12 < 1 && score > 0) grade12 = 1;
 
-    loadQuestion();
+        document.getElementById("grade-text").innerText = `Оцінка за тестування: ${grade12} балів (з 12)`;
+    }
 </script>
 
 </body>
