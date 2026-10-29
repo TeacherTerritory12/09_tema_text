@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вебквест: Опрацювання текстових даних (9 клас)</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --success: #16a34a;
+            --error: #dc2626;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .question-box {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .hint {
+            font-size: 13px;
+            color: #d97706;
+            background: #fef3c7;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 25px 0;
+        }
+
+        .option-item {
+            background: #f1f5f9;
+            border: 2px solid var(--border-color);
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-item:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+
+        .option-item.selected {
+            background: #e0e7ff;
+            border-color: var(--primary);
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .results {
+            text-align: center;
+            display: none;
+        }
+
+        .results h2 {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        .score-badge {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Квест: Опрацювання текстових даних</h1>
+    <div class="subtitle">Й. Ривкінд, НУШ 9 клас</div>
+
+    <div id="quiz-container">
+        <div class="info-bar">
+            <span id="question-counter">Запитання 1 з 10</span>
+            <span id="score-counter">Бали: 0</span>
+        </div>
+
+        <div id="question-box" class="question-box"></div>
+        <div class="hint">⚠️ Увага: у кожному питанні рівно ДВІ правильні відповіді! Позначте їх обидві.</div>
+
+        <ul id="options-container" class="options-list"></ul>
+
+        <button id="next-btn" class="btn" onclick="handleNextButton()">Далі</button>
+    </div>
+
+    <div id="results-container" class="results">
+        <h2>Вітаємо з проходженням квесту! 🎉</h2>
+        <p>Ви завершили перевірку знань за темою «Опрацювання текстових даних».</p>
+        <div class="score-badge" id="final-score">0 / 10</div>
+        <button class="btn" onclick="restartQuiz()">Спробувати знову</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        {
+            question: "Що є характерними ознаками та властивостями абзацу в текстовому процесорі Word?",
+            options: [
+                { text: "Фрагмент тексту, що завершується натисканням клавіші Enter.", correct: true },
+                { text: "Має власні параметри вирівнювання, відступів та міжрядкового інтервалу.", correct: true },
+                { text: "Будь-який текст, що обов'язково закінчується крапкою.", correct: false },
+                { text: "Сукупність символів, які не можна форматувати окремо від інших абзаців.", correct: false }
+            ]
+        },
+        {
+            question: "Які твердження щодо стилів оформлення в текстовому документі є правильними?",
+            options: [
+                { text: "Застосування стилів дозволяє швидко змінити оформлення всього документа або його частин.", correct: true },
+                { text: "Стиль може містити параметри шрифту, абзацу та кольору.", correct: true },
+                { text: "Стилі можна використовувати лише для створення списків.", correct: false },
+                { text: "Змінити вбудований стиль у програмі принципово неможливо.", correct: false }
+            ]
+        },
+        {
+            question: "Які твердження щодо створення списків у текстовому редакторі є правильними?",
+            options: [
+                { text: "Порядок елементів має важливе значення у нумерованих списках.", correct: true },
+                { text: "Маркери списку можна налаштовувати, використовуючи власні символи чи малюнки.", correct: true },
+                { text: "Нумерований список неможливо перетворити на маркований.", correct: false },
+                { text: "Відступи списку не можна регулювати за допомогою лінійки.", correct: false }
+            ]
+        },
+        {
+            question: "Для чого призначені колонтитули в текстовому документі?",
+            options: [
+                { text: "Для розміщення номери сторінок або назви документа на кожній сторінці.", correct: true },
+                { text: "Для розміщення тексту або графіки, що повторюються у верхньому чи нижньому полях.", correct: true },
+                { text: "Для автоматичного створення змісту документа.", correct: false },
+                { text: "Для блокування можливості редагування тексту.", correct: false }
+            ]
+        },
+        {
+            question: "Які наслідки можуть бути під час роботи з таблицями у текстовому редакторі?",
+            options: [
+                { text: "При виділенні рядка і натисканні клавіші Delete видаляється лише вміст клітинок, а структура залишається.", correct: true },
+                { text: "Таблицю можна розділити на дві частини або об'єднати з іншою.", correct: true },
+                { text: "Натискання Delete на виділеному рядку завжди повністю видаляє рядок із документа.", correct: false },
+                { text: "Додати новий стовпець до вже готової таблиці неможливо.", correct: false }
+            ]
+        },
+        {
+            question: "Які засоби використовуються для створення структури та навігації в документі?",
+            options: [
+                { text: "Зміст (автоматичне створення на основі стилів заголовків).", correct: true },
+                { text: "Область навігації або схема документа.", correct: true },
+                { text: "Автоматична нумерація окремих слів у тексті.", correct: false },
+                { text: "Шаблони сторінок формату A4.", correct: false }
+            ]
+        },
+        {
+            question: "Виберіть правильні твердження про роботу з багаторівневими списками:",
+            options: [
+                { text: "Багаторівневий список містить ієрархічну структуру (пункти та підпункти).", correct: true },
+                { text: "Може містити комбінацію маркерів і цифр для різних рівнів ієрархії.", correct: true },
+                { text: "У багаторівневому списку може бути лише два рівні вкладеності.", correct: false },
+                { text: "Створити такий список можна виключно вручну за допомогою пробілів.", correct: false }
+            ]
+        },
+        {
+            question: "Які елементи можна вставити до текстового документа через вкладку «Вставлення» (Insert)?",
+            options: [
+                { text: "Гіперпосилання.", correct: true },
+                { text: "Колонтитули та номери сторінок.", correct: true },
+                { text: "Новий власний абзацний стиль за замовчуванням.", correct: false },
+                { text: "Параметри розміру паперу (наприклад, А3 чи А4).", correct: false }
+            ]
+        },
+        {
+            question: "Які елементи структури таблиці відповідають правильним визначенням?",
+            options: [
+                { text: "Клітинка — область на перетині стовпця і рядка для введення даних.", correct: true },
+                { text: "Рядок — сукупність клітинок, розташованих горизонтально.", correct: true },
+                { text: "Стовпець — сукупність клітинок, розташованих горизонтально.", correct: false },
+                { text: "Клітинка — увесь текст, що знаходиться всередині таблиці.", correct: false }
+            ]
+        },
+        {
+            question: "Які дії входять до процесу створення власного стилю абзацу?",
+            options: [
+                { text: "Задання унікальної назви стилю.", correct: true },
+                { text: "Налаштування параметрів шрифту, міжрядкового інтервалу та вирівнювання.", correct: true },
+                { text: "Обов'язкове завантаження файлу стилю з інтернету.", correct: false },
+                { text: "Зміна розширення текстового документа з .docx на .style.", correct: false }
+            ]
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const questionCounter = document.getElementById("question-counter");
+    const scoreCounter = document.getElementById("score-counter");
+    const questionBox = document.getElementById("question-box");
+    const optionsContainer = document.getElementById("options-container");
+    const quizContainer = document.getElementById("quiz-container");
+    const resultsContainer = document.getElementById("results-container");
+    const finalScore = document.getElementById("final-score");
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // Перемішуємо самі питання та варіанти всередині них при завантаженні
+    shuffle(questions);
+    questions.forEach(q => shuffle(q.options));
+
+    function loadQuestion() {
+        const currentQ = questions[currentQuestionIndex];
+        questionCounter.innerText = `Запитання ${currentQuestionIndex + 1} з ${questions.length}`;
+        scoreCounter.innerText = `Бали: ${score}`;
+        questionBox.innerText = currentQ.question;
+        optionsContainer.innerHTML = "";
+
+        currentQ.options.forEach((option, index) => {
+            const li = document.createElement("li");
+            li.className = "option-item";
+            li.innerHTML = `
+                <input type="checkbox" id="opt-${index}" value="${index}">
+                <label for="opt-${index}" style="cursor: pointer; width: 100%;">${option.text}</label>
+            `;
+            
+            li.addEventListener("click", (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    const checkbox = li.querySelector("input");
+                    checkbox.checked = !checkbox.checked;
+                }
+                li.classList.toggle("selected", li.querySelector("input").checked);
+            });
+
+            optionsContainer.appendChild(li);
+        });
+    }
+
+    function handleNextButton() {
+        const currentQ = questions[currentQuestionIndex];
+        const checkboxes = optionsContainer.querySelectorAll("input[type='checkbox']");
+        
+        let userChoices = [];
+        checkboxes.forEach((cb, idx) => {
+            if (cb.checked) userChoices.push(idx);
+        });
+
+        // Перевіряємо, чи обрано рівно дві відповіді
+        if (userChoices.length !== 2) {
+            alert("Будь ласка, оберіть рівно ДВІ відповіді!");
+            return;
+        }
+
+        // Перевіряємо правильність
+        let correctIndices = [];
+        currentQ.options.forEach((opt, idx) => {
+            if (opt.correct) correctIndices.push(idx);
+        });
+
+        const isCorrect = userChoices.every(val => correctIndices.includes(val)) && 
+                          userChoices.length === correctIndices.length;
+
+        if (isCorrect) {
+            score++;
+        }
+
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        quizContainer.style.display = "none";
+        resultsContainer.style.display = "block";
+        finalScore.innerText = `${score} / ${questions.length}`;
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        shuffle(questions);
+        questions.forEach(q => shuffle(q.options));
+        quizContainer.style.display = "block";
+        resultsContainer.style.display = "none";
+        loadQuestion();
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
