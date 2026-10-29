@@ -31,7 +31,7 @@
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 850px;
             background: var(--card-bg);
             padding: 30px;
             border-radius: 16px;
@@ -135,7 +135,6 @@
             color: #fbbf24;
             background: rgba(251, 191, 36, 0.1);
             border: 1px solid rgba(251, 191, 36, 0.3);
-            padding: 8:px 12px;
             padding: 8px 12px;
             border-radius: 6px;
             margin-bottom: 15px;
@@ -220,6 +219,53 @@
             color: var(--text-muted);
             margin-bottom: 10px;
         }
+
+        /* Стилі для детального звіту */
+        .report-container {
+            text-align: left;
+            margin-top: 25px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .report-item {
+            background: #0f172a;
+            border-left: 5px solid var(--border-color);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+        .report-item.correct {
+            border-left-color: var(--success);
+        }
+
+        .report-item.incorrect {
+            border-left-color: var(--error);
+        }
+
+        .report-q-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .report-details {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .tag-correct {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .tag-error {
+            color: var(--error);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -262,8 +308,12 @@
         <h2>Результати тестування</h2>
         <div class="student-name-display" id="result-name"></div>
         <div class="score-badge" id="final-score">0 / 10</div>
-        <p id="grade-text" style="font-size: 18px; margin-bottom: 20px;"></p>
-        <button class="btn" onclick="location.reload()">Пройти знову</button>
+        <p id="grade-text" style="font-size: 18px; margin-bottom: 15px;"></p>
+        
+        <div style="font-weight: bold; margin-bottom: 10px; color: var(--text-muted);">Детальний звіт по відповідях:</div>
+        <div class="report-container" id="report-container"></div>
+
+        <button class="btn" style="margin-top: 20px;" onclick="location.reload()">Пройти знову</button>
     </div>
 </div>
 
@@ -364,6 +414,7 @@
     let currentQuestionIndex = 0;
     let score = 0;
     let studentFullName = "";
+    let userAnswersLog = []; // Масив для збереження відповідей учня
 
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -373,6 +424,7 @@
         return array;
     }
 
+    // Перемішуємо питання і варіанти перед початком
     shuffle(questions);
     questions.forEach(q => shuffle(q.options));
 
@@ -381,8 +433,6 @@
         const errorDiv = document.getElementById("name-error");
         const rawValue = nameInput.value.trim();
 
-        // Регулярний вираз: перевіряє чи це мінімум два слова, написані виключно українськими літерами
-        // Дозволяє літери а-щ, є, і, ї, ґ, пробіли, дефіси та апострофи.
         const ukrainianNameRegex = /^[А-ЩЬЮЯҐЄІЇA-ЩЬЮЯҐЄІЇа-щьюяґєї']+(\s+[А-ЩЬЮЯҐЄІЇа-щьюяґєї'-]+)+$/;
 
         if (!ukrainianNameRegex.test(rawValue)) {
@@ -393,7 +443,6 @@
         errorDiv.innerText = "";
         studentFullName = rawValue;
 
-        // Перемикаємо екран
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("quiz-container").style.display = "block";
         document.getElementById("student-greeting").innerText = studentFullName;
@@ -404,7 +453,6 @@
     function loadQuestion() {
         const currentQ = questions[currentQuestionIndex];
         
-        // Оновлюємо рядок прогресу
         document.getElementById("question-counter").innerText = `Запитання ${currentQuestionIndex + 1} з ${questions.length}`;
         const progressPercent = ((currentQuestionIndex) / questions.length) * 100;
         document.getElementById("progress-bar").style.width = `${progressPercent}%`;
@@ -437,27 +485,43 @@
         const currentQ = questions[currentQuestionIndex];
         const checkboxes = document.querySelectorAll("#options-container input[type='checkbox']");
         
-        let userChoices = [];
+        let userChoicesIndices = [];
+        let userChoicesTexts = [];
         checkboxes.forEach((cb, idx) => {
-            if (cb.checked) userChoices.push(idx);
+            if (cb.checked) {
+                userChoicesIndices.push(idx);
+                userChoicesTexts.push(currentQ.options[idx].text);
+            }
         });
 
-        if (userChoices.length !== 2) {
+        if (userChoicesIndices.length !== 2) {
             alert("Будь ласка, оберіть рівно ДВІ відповіді!");
             return;
         }
 
         let correctIndices = [];
+        let correctTexts = [];
         currentQ.options.forEach((opt, idx) => {
-            if (opt.correct) correctIndices.push(idx);
+            if (opt.correct) {
+                correctIndices.push(idx);
+                correctTexts.push(opt.text);
+            }
         });
 
-        const isCorrect = userChoices.every(val => correctIndices.includes(val)) && 
-                          userChoices.length === correctIndices.length;
+        const isCorrect = userChoicesIndices.every(val => correctIndices.includes(val)) && 
+                          userChoicesIndices.length === correctIndices.length;
 
         if (isCorrect) {
             score++;
         }
+
+        // Зберігаємо лог відповіді для фінального звіту
+        userAnswersLog.push({
+            question: currentQ.question,
+            userChoices: userChoicesTexts,
+            correctChoices: correctTexts,
+            isCorrect: isCorrect
+        });
 
         currentQuestionIndex++;
         if (currentQuestionIndex < questions.length) {
@@ -474,11 +538,28 @@
         document.getElementById("result-name").innerText = studentFullName;
         document.getElementById("final-score").innerText = `${score} / ${questions.length}`;
 
-        // Розрахунок оцінки за 12-бальною шкалою
         let grade12 = Math.round((score / questions.length) * 12);
         if (grade12 < 1 && score > 0) grade12 = 1;
-
         document.getElementById("grade-text").innerText = `Оцінка за тестування: ${grade12} балів (з 12)`;
+
+        // Формуємо детальний звіт
+        const reportContainer = document.getElementById("report-container");
+        reportContainer.innerHTML = "";
+
+        userAnswersLog.forEach((item, index) => {
+            const reportItem = document.createElement("div");
+            reportItem.className = `report-item ${item.isCorrect ? 'correct' : 'incorrect'}`;
+            
+            reportItem.innerHTML = `
+                <div class="report-q-title">${index + 1}. ${item.question}</div>
+                <div class="report-details">
+                    Статус: <span class="${item.isCorrect ? 'tag-correct' : 'tag-error'}">${item.isCorrect ? 'Правильно ✓' : 'Помилка ✗'}</span><br>
+                    <strong>Ваші відповіді:</strong> ${item.userChoices.join('; ')}<br>
+                    <strong>Правильні відповіді:</strong> ${item.correctChoices.join('; ')}
+                </div>
+            `;
+            reportContainer.appendChild(reportItem);
+        });
     }
 </script>
 
